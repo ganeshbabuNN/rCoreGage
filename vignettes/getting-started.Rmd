@@ -1,0 +1,104 @@
+---
+title: "Getting Started with rCoreGage"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with rCoreGage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Installation
+
+```r
+install.packages("rCoreGage")
+```
+
+## Create a new project
+
+```r
+rCoreGage::create_project(
+  name = "TRIAL_ABC",
+  path = "C:/Projects"
+)
+```
+
+This creates the full folder structure and copies all required templates.
+
+## Project structure created
+
+```
+TRIAL_ABC/
+  TRIAL_ABC.Rproj
+  run_coregage.R
+  rules/
+    config/
+      rule_registry.xlsx   <- fill in your checks here
+      project_config.R     <- paths auto-filled
+    trial/                 <- write trial-level check scripts here
+    study/                 <- write study-level check scripts here
+  inputs/                  <- drop domain data files here
+  outputs/
+    reports/               <- Excel reports written here
+    feedback/
+      DM/   MW/   SDTM/   ADAM/   <- reviewers place feedback here
+```
+
+## Define checks in rule_registry.xlsx
+
+Open `rules/config/rule_registry.xlsx`. It has two sheets: **Trial** and **Study**.
+
+| Column | Purpose |
+|--------|---------|
+| Category | Domain grouping e.g. Adverse Events |
+| Subcategory | Check type e.g. Date Checks |
+| ID | Unique check identifier e.g. AECHK001 |
+| Active | Yes = run, No = skip |
+| DM_Report | Yes = include in DM report |
+| MW_Report | Yes = include in Medical Writing report |
+| SDTM_Report | Yes = include in SDTM report |
+| ADAM_Report | Yes = include in ADaM report |
+| Rule_Set | Name of the .R file e.g. AE |
+| Description | Plain English check description |
+| Notes | Free text notes |
+
+## Write a check script
+
+Copy `rules/trial/Check_Template.R`, rename it to match your Rule_Set,
+and implement your check logic:
+
+```r
+check_AE <- function(state, cfg) {
+  domains      <- state$domains
+  active_rules <- state$active_rules
+
+  if (isTRUE(active_rules["AECHK001"])) {
+    AECHK001 <- domains$ae |>
+      dplyr::filter(is.na(AESEV) | trimws(AESEV) == "") |>
+      dplyr::mutate(
+        subj_id     = USUBJID,
+        vis_id      = NA_real_,
+        description = paste0("AESEV missing for: ", AETERM)
+      ) |>
+      dplyr::select(subj_id, vis_id, description)
+
+    state <- collect_findings(state, AECHK001, id = "AECHK001")
+  }
+  state
+}
+```
+
+## Run
+
+```r
+source("run_coregage.R")
+```
+
+Reports are written to `outputs/reports/`.
+
+## Feedback loop
+
+1. Send `DM_issues.xlsx` to the Data Manager
+2. They add notes in the REVIEW NOTE column and update STATUS
+3. They save the file to `outputs/feedback/DM/`
+4. Re-run `source("run_coregage.R")`
+5. Feedback is merged back into the next report automatically
