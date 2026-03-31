@@ -68,8 +68,12 @@ build_reports <- function(cfg, state) {
     message("  Importing saved issues: ", fname)
     df <- tryCatch(
       readxl::read_xlsx(path, sheet = "Details",
-                        range = "A3:L500000", col_types = "text"),
-      error = function(e) { message("  WARNING: cannot read ", path); NULL }
+                        skip = 2, col_types = "text"),
+      error = function(e) {
+        message("  WARNING: cannot read ", basename(path),
+                " -- ", conditionMessage(e))
+        NULL
+      }
     )
     if (is.null(df) || nrow(df) == 0) return(NULL)
 
@@ -99,8 +103,10 @@ build_reports <- function(cfg, state) {
     df$desrp       <- clean(df$desrp)
     df$analyst_note<- clean(df$analyst_note)
     df$dup_id      <- gsub("\\s", "", df$desrp)
-    df[, c("id","subj_id","vis_id","desrp","dup_id","find_dt",
-           "status","analyst_note","analyst_id")]
+    out <- df[, c("id","subj_id","vis_id","desrp","dup_id","find_dt",
+                  "status","analyst_note","analyst_id")]
+    message("    -> ", nrow(out), " saved issue(s) loaded from ", fname)
+    out
   }
 
   old_open   <- import_saved("all_open.xlsx")
@@ -252,12 +258,13 @@ build_reports <- function(cfg, state) {
                              full.names = TRUE, ignore.case = TRUE)
       if (length(fb_files) == 0) next
 
-      message("  Importing feedback from: feedback/", role, "/")
+      message("  Importing feedback from: feedback/", role, "/ (",
+              length(fb_files), " file(s))")
 
       fb_list <- lapply(fb_files, function(fpath) {
         tryCatch({
           df <- readxl::read_xlsx(fpath, sheet = "Details",
-                                  range = "A3:L500000", col_types = "text")
+                                  skip = 2, col_types = "text")
           col_map2 <- c(
             "CHECK ID"="id","SUBJECT ID"="subj_id","VISIT ID"="vis_id",
             "DESCRIPTION"="desrp","FIND DATE"="find_dt","STATUS"="status",
@@ -281,7 +288,11 @@ build_reports <- function(cfg, state) {
       })
 
       fb_all <- do.call(dplyr::bind_rows, Filter(Negate(is.null), fb_list))
-      if (is.null(fb_all) || nrow(fb_all) == 0) next
+      if (is.null(fb_all) || nrow(fb_all) == 0) {
+        message("    -> 0 rows could be read from feedback/", role,
+                "/ files - check file is not open in Excel")
+        next
+      }
 
       fb_all  <- fb_all[order(fb_all$id, fb_all$subj_id,
                                fb_all$vis_id, fb_all$dup_id,
@@ -293,6 +304,15 @@ build_reports <- function(cfg, state) {
                            names(holder))
       holder  <- holder[, keep]
       names(holder)[names(holder)=="status"] <- "fb_status"
+
+      # Count how many rows have an actual reviewer note or status change
+      n_noted  <- sum(!is.na(holder$review_note) &
+                       trimws(holder$review_note) != "", na.rm = TRUE)
+      n_status <- sum(!is.na(holder$fb_status) &
+                       trimws(holder$fb_status) != "", na.rm = TRUE)
+      message("    -> ", nrow(holder), " finding(s) matched from feedback/", role,
+              "/  |  ", n_status, " status update(s)  |  ",
+              n_noted, " review note(s)")
 
       if (!"dup_id" %in% names(issuelist)) {
         issuelist$dup_id <- gsub("\\s", "", ifelse(is.na(issuelist$desrp),
@@ -324,6 +344,15 @@ build_reports <- function(cfg, state) {
 
     # Clean dup_id column from final output
     if ("dup_id" %in% names(issuelist)) issuelist$dup_id <- NULL
+
+    n_with_review <- sum(
+      !is.na(issuelist$review_note) & trimws(issuelist$review_note) != "",
+      na.rm = TRUE)
+    n_closed <- sum(tolower(trimws(issuelist$status)) == "closed", na.rm = TRUE)
+    n_open   <- sum(tolower(trimws(issuelist$status)) != "closed", na.rm = TRUE)
+    message("  Feedback summary: ",
+            n_with_review, " finding(s) carry reviewer notes | ",
+            n_closed, " closed | ", n_open, " open")
   }
 
   #  Split open / closed 
