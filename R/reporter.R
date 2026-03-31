@@ -109,6 +109,19 @@ build_reports <- function(cfg, state) {
     out
   }
 
+  # Replace NA vis_id with sentinel so merge() treats them as equal.
+  # merge() in R does NOT match NA==NA, so we use -1 as a sentinel key.
+  .add_vis_sentinel  <- function(df) {
+    if ("vis_id" %in% names(df))
+      df$vis_id <- ifelse(is.na(df$vis_id), -1, df$vis_id)
+    df
+  }
+  .drop_vis_sentinel <- function(df) {
+    if ("vis_id" %in% names(df))
+      df$vis_id <- ifelse(df$vis_id == -1, NA_real_, df$vis_id)
+    df
+  }
+
   old_open   <- import_saved("all_open.xlsx")
   old_closed <- import_saved("all_closed.xlsx")
 
@@ -151,6 +164,7 @@ build_reports <- function(cfg, state) {
       newf <- unique(newf[, c("id","subj_id","vis_id","desrp")])
       newf$dup_id <- gsub("\\s", "", newf$desrp)
       newf$.new   <- TRUE
+      newf        <- .add_vis_sentinel(newf)
     } else {
       newf <- data.frame(id=character(0), subj_id=character(0),
                          vis_id=numeric(0), desrp=character(0),
@@ -158,7 +172,10 @@ build_reports <- function(cfg, state) {
                          stringsAsFactors=FALSE)
     }
 
-    if (nrow(olddata) > 0) olddata$.old <- TRUE
+    if (nrow(olddata) > 0) {
+      olddata$.old <- TRUE
+      olddata <- .add_vis_sentinel(olddata)
+    }
 
     if (nrow(newf) > 0 && nrow(olddata) > 0) {
       merged <- merge(newf, olddata,
@@ -188,11 +205,16 @@ build_reports <- function(cfg, state) {
       merged$desrp.x <- merged$desrp.y <- NULL
     }
 
+    merged <- .drop_vis_sentinel(merged)
+
     for (col in c("status","analyst_note","analyst_id","find_dt")) {
       if (!col %in% names(merged)) {
         merged[[col]] <- if (col == "find_dt") as.Date(NA) else NA_character_
       }
     }
+
+    # Preserve original old status before reassignment
+    merged$old_status <- ifelse(is.na(merged$status), "", merged$status)
 
     # Assign status
     merged$status <- mapply(function(is_new, is_old, st, cmt, init) {
@@ -214,21 +236,27 @@ build_reports <- function(cfg, state) {
     SIMPLIFY = TRUE)
 
     # Auto-update analyst_note
-    merged$analyst_note <- mapply(function(is_new, is_old, st, cmt) {
-      ac  <- paste0("[Not in data anymore (", sdate, ").]")
-      ro  <- paste0("[Was closed but re-appeared (", sdate, ").]")
-      cout <- trimws(ifelse(is.na(cmt),"",cmt))
-      stl  <- tolower(trimws(st))
-      if (!is_new && is_old && !grepl(ac, cout, fixed=TRUE))
-        return(paste(cout, ac))
-      if (is_new && is_old && stl=="open" &&
+    # old_status = status from previous run (before this run's reassignment)
+    merged$analyst_note <- mapply(function(is_new, is_old, st, old_st, cmt) {
+      ac     <- paste0("[Not in data anymore (", sdate, ").]")
+      ro     <- paste0("[Was closed but re-appeared (", sdate, ").]")
+      cout   <- trimws(ifelse(is.na(cmt),"",cmt))
+      old_stl <- tolower(trimws(ifelse(is.na(old_st),"",old_st)))
+      # Finding dropped out of data
+      if (!is_new && is_old && !grepl("not in data anymore", tolower(cout)))
+        return(trimws(paste(gsub("\\[Not in data.*?\\]", "", cout), ac)))
+      # Finding was previously CLOSED but is now back in data
+      if (is_new && is_old && old_stl == "closed" &&
           !grepl("closed by analyst", tolower(cout)) &&
-          !grepl(ro, cout, fixed=TRUE))
-        return(paste(cout, ro))
+          !grepl("was closed but re-appeared", tolower(cout)))
+        return(trimws(paste(gsub("\\[Was closed.*?\\]", "", cout), ro)))
       return(cout)
-    }, merged$.new, merged$.old, merged$status,
+    }, merged$.new, merged$.old, merged$status, merged$old_status,
     ifelse(is.na(merged$analyst_note),"",merged$analyst_note),
     SIMPLIFY=TRUE)
+
+    # Remove helper column
+    merged$old_status <- NULL
 
     merged$find_dt <- as.Date(
       ifelse(is.na(merged$find_dt), as.numeric(Sys.Date()),
@@ -318,6 +346,8 @@ build_reports <- function(cfg, state) {
         issuelist$dup_id <- gsub("\\s", "", ifelse(is.na(issuelist$desrp),
                                                     "", issuelist$desrp))
       }
+      issuelist <- .add_vis_sentinel(issuelist)
+      holder    <- .add_vis_sentinel(holder)
       issuelist <- merge(issuelist, holder,
                          by = c("id","subj_id","vis_id","dup_id"),
                          all.x = TRUE, suffixes = c("",".fb"))
@@ -340,6 +370,7 @@ build_reports <- function(cfg, state) {
         issuelist$reviewer_id.fb <- NULL
       }
       issuelist$fb_status <- NULL
+      issuelist <- .drop_vis_sentinel(issuelist)
     }
 
     # Clean dup_id column from final output
