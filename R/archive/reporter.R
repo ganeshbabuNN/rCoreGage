@@ -39,28 +39,6 @@ build_reports <- function(cfg, state) {
 
   clean <- .cleanup_text
 
-  # Parse a date column that may contain Excel serial numbers (numeric strings),
-  # ISO date strings "2024-01-15", or formatted strings "15Jan2024".
-  # Returns a Date vector; NAs are preserved rather than crashing.
-  .parse_date_col <- function(x) {
-    if (inherits(x, "Date")) return(x)
-    x <- as.character(x)
-    result <- suppressWarnings(as.Date(as.numeric(x), origin = "1899-12-30"))
-    # Where numeric conversion failed, try ISO string
-    na_idx <- is.na(result)
-    if (any(na_idx)) {
-      result[na_idx] <- suppressWarnings(as.Date(x[na_idx]))
-    }
-    # Where ISO also failed, try ddMMMYYYY format e.g. "15Jan2024"
-    na_idx <- is.na(result)
-    if (any(na_idx)) {
-      result[na_idx] <- suppressWarnings(
-        as.Date(x[na_idx], format = "%d%b%Y"))
-    }
-    result
-  }
-
-
   #  Import previously saved issues 
   import_saved <- function(fname) {
     path <- file.path(cfg$reports, fname)
@@ -86,16 +64,13 @@ build_reports <- function(cfg, state) {
                 "analyst_note","analyst_id")
     for (col in needed) if (!col %in% names(df)) df[[col]] <- NA_character_
 
-    df <- df[!is.na(df$find_dt), ]
-    if ("analyst_note" %in% names(df)) {
-      is_placeholder <- !is.na(df$analyst_note) &
-                        toupper(trimws(df$analyst_note)) == "THIS IS EMPTY"
-      df <- df[!is_placeholder, ]
-    }
+    df <- df[!is.na(df$find_dt) &
+               toupper(trimws(df$analyst_note)) != "THIS IS EMPTY", ]
     if (nrow(df) == 0) return(NULL)
 
-    df$vis_id  <- suppressWarnings(as.numeric(df$vis_id))
-    df$find_dt <- .parse_date_col(df$find_dt)
+    df$vis_id      <- suppressWarnings(as.numeric(df$vis_id))
+    df$find_dt     <- suppressWarnings(
+      as.Date(as.numeric(df$find_dt), origin = "1899-12-30"))
     df$desrp       <- clean(df$desrp)
     df$analyst_note<- clean(df$analyst_note)
     df$dup_id      <- gsub("\\s", "", df$desrp)
@@ -268,8 +243,9 @@ build_reports <- function(cfg, state) {
           }
           df <- df[!is.na(df$find_dt), ]
           if (nrow(df) == 0) return(NULL)
-          df$vis_id  <- suppressWarnings(as.numeric(df$vis_id))
-          df$find_dt <- .parse_date_col(df$find_dt)
+          df$vis_id     <- suppressWarnings(as.numeric(df$vis_id))
+          df$find_dt    <- suppressWarnings(
+            as.Date(as.numeric(df$find_dt), origin="1899-12-30"))
           df$last_mod   <- file.mtime(fpath)
           df$dup_id     <- gsub("\\s","",clean(df$desrp))
           df$desrp      <- clean(df$desrp)
@@ -294,10 +270,6 @@ build_reports <- function(cfg, state) {
       holder  <- holder[, keep]
       names(holder)[names(holder)=="status"] <- "fb_status"
 
-      if (!"dup_id" %in% names(issuelist)) {
-        issuelist$dup_id <- gsub("\\s", "", ifelse(is.na(issuelist$desrp),
-                                                    "", issuelist$desrp))
-      }
       issuelist <- merge(issuelist, holder,
                          by = c("id","subj_id","vis_id","dup_id"),
                          all.x = TRUE, suffixes = c("",".fb"))

@@ -1,0 +1,7 @@
+# CoreGage project gitignore
+inputs/
+outputs/
+.Rproj.user
+.Rhistory
+.RData
+*.Rproj.user/
