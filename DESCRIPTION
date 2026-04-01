@@ -2,7 +2,7 @@ Package: rCoreGage
 Title: Data Quality Check Framework for Clinical and Analytical Data
 Version: 0.1.0
 Authors@R: c(
-    person("CoreGage Team", email = "support@coregage.io",
+    person("Ganesh Babu G", email = "ganeshbabu346@gmail.com",
            role = c("aut", "cre")))
 Description: A configuration-driven framework for running domain-level
     data quality checks and consolidating findings into structured Excel
@@ -25,5 +25,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/coregage/rCoreGage
-BugReports: https://github.com/coregage/rCoreGage/issues
+URL: https://github.com/ganeshbabuNN/rCoreGage
+BugReports: https://github.com/ganeshbabuNN/rCoreGage/issues
