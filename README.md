@@ -111,7 +111,6 @@ copy-pasted per trial, with no separation between the engine and the rules.
 Only the check scripts, `rule_registry.xlsx`, and `inputs/` change per trial.
 
 ---
-
 ## 3. Installation
 
 ### From CRAN (stable release)
@@ -119,13 +118,21 @@ Only the check scripts, `rule_registry.xlsx`, and `inputs/` change per trial.
 ```r
 install.packages("rCoreGage")
 ```
-
-### From GitHub (development version)
+### From GitHub (Stable version)
 
 ```r
 #install.packages("remotes")
 remotes::install_github("ganeshbabunn/rCoreGage")
 ```
+# Development version:
+```r
+#install.packages("remotes")
+remotes::install_github("ganeshbabunn/rCoreGage@dev")
+```
+
+# From local source
+install.packages("../rCoreGage_X.X.tar.gz", repos = NULL, type = "source")
+X indicates the version of the release
 
 ### Dependencies
 
