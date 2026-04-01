@@ -130,8 +130,10 @@ remotes::install_github("ganeshbabunn/rCoreGage")
 remotes::install_github("ganeshbabunn/rCoreGage@dev")
 ```
 ### From local source
+```r
 install.packages("../rCoreGage_X.X.tar.gz", repos = NULL, type = "source")
 X indicates the version of the release
+```
 
 ### Dependencies
 
