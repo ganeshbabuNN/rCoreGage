@@ -124,13 +124,12 @@ install.packages("rCoreGage")
 #install.packages("remotes")
 remotes::install_github("ganeshbabunn/rCoreGage")
 ```
-# Development version:
+### Development version:
 ```r
 #install.packages("remotes")
 remotes::install_github("ganeshbabunn/rCoreGage@dev")
 ```
-
-# From local source
+### From local source
 install.packages("../rCoreGage_X.X.tar.gz", repos = NULL, type = "source")
 X indicates the version of the release
 
