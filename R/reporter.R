@@ -216,18 +216,19 @@ build_reports <- function(cfg, state) {
     # Preserve original old status before reassignment
     merged$old_status <- ifelse(is.na(merged$status), "", merged$status)
 
-    # Assign status
+    # Assign status (pre-feedback merge pass  uses analyst note/id only)
+    # Reviewer-based closure is handled after feedback merge in Part 3.
     merged$status <- mapply(function(is_new, is_old, st, cmt, init) {
       st_l  <- tolower(trimws(ifelse(is.na(st),"",st)))
       cmt_l <- tolower(trimws(ifelse(is.na(cmt),"",cmt)))
       hi    <- nchar(trimws(ifelse(is.na(init),"",init))) > 0
       by_an <- grepl("closed by analyst", cmt_l)
-      if  (is_new && !is_old)                                     return("Open")
-      if  (is_new &&  is_old && st_l != "closed")                 return(st)
-      if  (is_new &&  is_old && st_l=="closed" && by_an &&  hi)   return("Closed")
-      if  (is_new &&  is_old && st_l=="closed" && by_an && !hi)   return("Open")
-      if  (is_new &&  is_old && st_l=="closed" && !by_an)         return("Open")
-      if (!is_new &&  is_old)                                      return("Closed")
+      if  (is_new && !is_old)                                      return("Open")
+      if  (is_new &&  is_old && st_l != "closed")                  return(st)
+      if  (is_new &&  is_old && st_l == "closed" && by_an && hi)   return("Closed")
+      if  (is_new &&  is_old && st_l == "closed" && by_an && !hi)  return("Open")
+      if  (is_new &&  is_old && st_l == "closed" && !by_an)        return("Open")
+      if (!is_new &&  is_old)                                       return("Closed")
       return(ifelse(is.na(st), "Open", st))
     }, merged$.new, merged$.old,
     ifelse(is.na(merged$status),"",merged$status),
@@ -246,10 +247,17 @@ build_reports <- function(cfg, state) {
       if (!is_new && is_old && !grepl("not in data anymore", tolower(cout)))
         return(trimws(paste(gsub("\\[Not in data.*?\\]", "", cout), ac)))
       # Finding was previously CLOSED but is now back in data
+      # Only fire "re-appeared" tag if finding was closed by ANALYST
+      # (not by reviewer) and has now re-appeared in the data.
+      by_reviewer <- grepl("closed by reviewer", tolower(cout))
       if (is_new && is_old && old_stl == "closed" &&
+          !by_reviewer &&
           !grepl("closed by analyst", tolower(cout)) &&
           !grepl("was closed but re-appeared", tolower(cout)))
         return(trimws(paste(gsub("\\[Was closed.*?\\]", "", cout), ro)))
+      # If closed by reviewer and still in data, keep Closed (no tag needed)
+      if (is_new && is_old && old_stl == "closed" && by_reviewer)
+        return(cout)
       return(cout)
     }, merged$.new, merged$.old, merged$status, merged$old_status,
     ifelse(is.na(merged$analyst_note),"",merged$analyst_note),
@@ -296,6 +304,7 @@ build_reports <- function(cfg, state) {
           col_map2 <- c(
             "CHECK ID"="id","SUBJECT ID"="subj_id","VISIT ID"="vis_id",
             "DESCRIPTION"="desrp","FIND DATE"="find_dt","STATUS"="status",
+            "ANALYST NOTE"="analyst_note","ANALYST ID"="analyst_id",
             "REVIEW NOTE"="review_note","REVIEWER ID"="reviewer_id"
           )
           for (o in names(col_map2)) {
@@ -328,10 +337,13 @@ build_reports <- function(cfg, state) {
       holder  <- fb_all[!duplicated(fb_all[, c("id","subj_id",
                                                 "vis_id","dup_id")]), ]
       keep    <- intersect(c("id","subj_id","vis_id","dup_id",
+                             "analyst_note","analyst_id",
                              "review_note","reviewer_id","status"),
                            names(holder))
       holder  <- holder[, keep]
-      names(holder)[names(holder)=="status"] <- "fb_status"
+      names(holder)[names(holder)=="status"]       <- "fb_status"
+      names(holder)[names(holder)=="analyst_note"] <- "fb_analyst_note"
+      names(holder)[names(holder)=="analyst_id"]   <- "fb_analyst_id"
 
       # Count how many rows have an actual reviewer note or status change
       n_noted  <- sum(!is.na(holder$review_note) &
@@ -353,8 +365,31 @@ build_reports <- function(cfg, state) {
                          all.x = TRUE, suffixes = c("",".fb"))
 
       upd <- !is.na(issuelist$fb_status) &
-             tolower(trimws(issuelist$status)) != "closed"
+               trimws(issuelist$fb_status) != ""
       issuelist$status[upd] <- issuelist$fb_status[upd]
+
+      # For reviewer-closed findings: mark as reviewer-closed so auto_note
+      # on the next run does not treat them as "re-appeared".
+      # A reviewer closure is identified by: status=Closed AND reviewer_id present.
+      is_reviewer_closed <- !is.na(issuelist$status) &
+        tolower(trimws(issuelist$status)) == "closed" &
+        ( (!is.na(issuelist$reviewer_id) & trimws(issuelist$reviewer_id) != "") |
+          (!is.na(issuelist$review_note) & trimws(issuelist$review_note) != "") )
+      # Tag the analyst_note so the next run knows this was reviewer-closed
+      if (any(is_reviewer_closed, na.rm=TRUE)) {
+        tag <- "[closed by reviewer]"
+        issuelist$analyst_note[is_reviewer_closed] <- trimws(
+          paste(
+            ifelse(is.na(issuelist$analyst_note[is_reviewer_closed]), "",
+                   issuelist$analyst_note[is_reviewer_closed]),
+            tag))
+        # Deduplicate the tag if already present
+        issuelist$analyst_note <- gsub(
+          "(\\[closed by reviewer\\]\\s*)+",
+          "[closed by reviewer] ",
+          issuelist$analyst_note)
+        issuelist$analyst_note <- trimws(issuelist$analyst_note)
+      }
 
       # Merge review notes
       if ("review_note.fb" %in% names(issuelist)) {
@@ -370,6 +405,27 @@ build_reports <- function(cfg, state) {
         issuelist$reviewer_id.fb <- NULL
       }
       issuelist$fb_status <- NULL
+
+      # Merge analyst_note from feedback (reviewer may have corrected it)
+      if ("fb_analyst_note" %in% names(issuelist)) {
+        issuelist$analyst_note <- ifelse(
+          !is.na(issuelist$fb_analyst_note) &
+            trimws(issuelist$fb_analyst_note) != "",
+          issuelist$fb_analyst_note,
+          ifelse(is.na(issuelist$analyst_note), "",
+                 issuelist$analyst_note))
+        issuelist$fb_analyst_note <- NULL
+      }
+      if ("fb_analyst_id" %in% names(issuelist)) {
+        issuelist$analyst_id <- ifelse(
+          !is.na(issuelist$fb_analyst_id) &
+            trimws(issuelist$fb_analyst_id) != "",
+          issuelist$fb_analyst_id,
+          ifelse(is.na(issuelist$analyst_id), "",
+                 issuelist$analyst_id))
+        issuelist$fb_analyst_id <- NULL
+      }
+
       issuelist <- .drop_vis_sentinel(issuelist)
     }
 
