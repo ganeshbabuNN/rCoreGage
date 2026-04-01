@@ -346,13 +346,16 @@ build_reports <- function(cfg, state) {
       names(holder)[names(holder)=="analyst_id"]   <- "fb_analyst_id"
 
       # Count how many rows have an actual reviewer note or status change
-      n_noted  <- sum(!is.na(holder$review_note) &
-                       trimws(holder$review_note) != "", na.rm = TRUE)
+      n_review_noted  <- sum(!is.na(holder$review_note) &
+                             trimws(holder$review_note) != "", na.rm = TRUE)
+      n_analyst_noted <- sum(!is.na(holder$fb_analyst_note) &
+                             trimws(holder$fb_analyst_note) != "", na.rm = TRUE)
       n_status <- sum(!is.na(holder$fb_status) &
                        trimws(holder$fb_status) != "", na.rm = TRUE)
-      message("    -> ", nrow(holder), " finding(s) matched from feedback/", role,
-              "/  |  ", n_status, " status update(s)  |  ",
-              n_noted, " review note(s)")
+      message("    -> ", nrow(holder), " finding(s) matched from feedback/", role, "/")
+      message("         status updates: ", n_status,
+              "  |  analyst notes: ", n_analyst_noted,
+              "  |  review notes: ",  n_review_noted)
 
       if (!"dup_id" %in% names(issuelist)) {
         issuelist$dup_id <- gsub("\\s", "", ifelse(is.na(issuelist$desrp),
@@ -432,14 +435,24 @@ build_reports <- function(cfg, state) {
     # Clean dup_id column from final output
     if ("dup_id" %in% names(issuelist)) issuelist$dup_id <- NULL
 
-    n_with_review <- sum(
+    n_with_review  <- sum(
       !is.na(issuelist$review_note) & trimws(issuelist$review_note) != "",
       na.rm = TRUE)
+    n_with_analyst <- sum(
+      !is.na(issuelist$analyst_note) & trimws(issuelist$analyst_note) != "" &
+      !grepl("^\\[", trimws(issuelist$analyst_note)),
+      na.rm = TRUE)
     n_closed <- sum(tolower(trimws(issuelist$status)) == "closed", na.rm = TRUE)
-    n_open   <- sum(tolower(trimws(issuelist$status)) != "closed", na.rm = TRUE)
-    message("  Feedback summary: ",
-            n_with_review, " finding(s) carry reviewer notes | ",
-            n_closed, " closed | ", n_open, " open")
+    n_queried<- sum(tolower(trimws(issuelist$status)) == "queried", na.rm = TRUE)
+    n_open   <- sum(tolower(trimws(issuelist$status)) == "open",    na.rm = TRUE)
+    message("  -------------------------------------------------------")
+    message("  Feedback summary:")
+    message("    Notes  : analyst notes: ", n_with_analyst,
+            "  |  reviewer notes: ", n_with_review)
+    message("    Status : open: ", n_open,
+            "  |  queried: ", n_queried,
+            "  |  closed: ", n_closed)
+    message("  -------------------------------------------------------")
   }
 
   #  Split open / closed 
