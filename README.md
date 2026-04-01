@@ -1076,5 +1076,5 @@ See [LICENSE](LICENSE) for full terms.
 
 ```
 rCoreGage: Data Quality Check Framework for Clinical and Analytical Data. 
-https://github.com/rCoreGage
+https://github.com/ganeshbabuNN/rCoreGage
 ```
