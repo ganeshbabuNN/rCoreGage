@@ -11,6 +11,7 @@ check_FA <- function(state, cfg) {
     message("  WARNING [FA]: domains$fa is empty - skipping.") ; return(state) }
   fa <- domains$fa
 
+  # FACHK001 : Missing finding result (FAORRES)
   if (isTRUE(active_rules["FACHK001"])) {
     message("  Running FACHK001 - Missing FAORRES ...")
     FACHK001 <- fa |>
@@ -21,6 +22,7 @@ check_FA <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,FACHK001,id="FACHK001") }
 
+  # FACHK002 : Missing finding date (FADTC)
   if (isTRUE(active_rules["FACHK002"])) {
     message("  Running FACHK002 - Missing FADTC ...")
     FACHK002 <- fa |>
@@ -31,6 +33,7 @@ check_FA <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,FACHK002,id="FACHK002") }
 
+  # FACHK003 : Missing evaluator flag (FAEVAL)
   if (isTRUE(active_rules["FACHK003"])) {
     message("  Running FACHK003 - Missing FAEVAL ...")
     FACHK003 <- fa |>

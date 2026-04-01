@@ -11,6 +11,7 @@ check_PC_study <- function(state, cfg) {
     message("  WARNING [PC_study]: domains$pc is empty - skipping.") ; return(state) }
   pc <- domains$pc
 
+  # PCPRJ001 : Missing specimen type (PCSPEC)
   if (isTRUE(active_rules["PCPRJ001"])) {
     message("  Running PCPRJ001 - Missing PCSPEC ...")
     PCPRJ001 <- pc |>
@@ -21,6 +22,7 @@ check_PC_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PCPRJ001,id="PCPRJ001") }
 
+  # PCPRJ002 : Missing concentration units (PCSTRESU)
   if (isTRUE(active_rules["PCPRJ002"])) {
     message("  Running PCPRJ002 - Missing PCSTRESU ...")
     PCPRJ002 <- pc |>
@@ -32,6 +34,7 @@ check_PC_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PCPRJ002,id="PCPRJ002") }
 
+  # PCPRJ003 : Duplicate records for same subject, visit, and test
   if (isTRUE(active_rules["PCPRJ003"])) {
     message("  Running PCPRJ003 - Duplicate PC records ...")
     PCPRJ003 <- pc |>

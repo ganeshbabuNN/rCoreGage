@@ -12,6 +12,7 @@ check_VS_study <- function(state, cfg) {
     message("  WARNING [VS_study]: domains$vs is empty - skipping.") ; return(state) }
   vs <- domains$vs
 
+  # VSPRJ001 : Missing vital sign collection date (VSDTC)
   if (isTRUE(active_rules["VSPRJ001"])) {
     message("  Running VSPRJ001 - Missing VSDTC ...")
     VSPRJ001 <- vs |>
@@ -22,6 +23,7 @@ check_VS_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,VSPRJ001,id="VSPRJ001") }
 
+  # VSPRJ002 : Duplicate vital sign records same subject/visit/test
   if (isTRUE(active_rules["VSPRJ002"])) {
     message("  Running VSPRJ002 - Duplicate VS records ...")
     VSPRJ002 <- vs |>
@@ -35,6 +37,7 @@ check_VS_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,VSPRJ002,id="VSPRJ002") }
 
+  # VSPRJ003 : Invalid position (VSPOS) value
   if (isTRUE(active_rules["VSPRJ003"])) {
     message("  Running VSPRJ003 - Invalid VSPOS ...")
     if (!"VSPOS" %in% names(vs)) {

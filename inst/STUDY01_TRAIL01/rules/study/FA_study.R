@@ -11,6 +11,7 @@ check_FA_study <- function(state, cfg) {
     message("  WARNING [FA_study]: domains$fa is empty - skipping.") ; return(state) }
   fa <- domains$fa
 
+  # FAPRJ001 : Missing parent domain reference object (FAOBJ)
   if (isTRUE(active_rules["FAPRJ001"])) {
     message("  Running FAPRJ001 - Missing FAOBJ ...")
     FAPRJ001 <- fa |>
@@ -20,7 +21,8 @@ check_FA_study <- function(state, cfg) {
           ifelse(is.na(FATESTCD),"[FATESTCD missing]",FATESTCD))) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,FAPRJ001,id="FAPRJ001") }
-
+  
+  # FAPRJ002 : Missing test code (FATESTCD)
   if (isTRUE(active_rules["FAPRJ002"])) {
     message("  Running FAPRJ002 - Missing FATESTCD ...")
     FAPRJ002 <- fa |>
@@ -30,6 +32,7 @@ check_FA_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,FAPRJ002,id="FAPRJ002") }
 
+  # FAPRJ003 : Missing finding status (FASTAT)
   if (isTRUE(active_rules["FAPRJ003"])) {
     message("  Running FAPRJ003 - Missing FASTAT ...")
     FAPRJ003 <- fa |>

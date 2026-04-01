@@ -11,6 +11,7 @@ check_PC <- function(state, cfg) {
     message("  WARNING [PC]: domains$pc is empty - skipping.") ; return(state) }
   pc <- domains$pc
 
+  # PCCHK001 : Missing concentration result (PCORRES)
   if (isTRUE(active_rules["PCCHK001"])) {
     message("  Running PCCHK001 - Missing PCORRES ...")
     PCCHK001 <- pc |>
@@ -21,6 +22,7 @@ check_PC <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PCCHK001,id="PCCHK001") }
 
+  # PCCHK002 : Negative concentration value (PCORRES < 0)
   if (isTRUE(active_rules["PCCHK002"])) {
     message("  Running PCCHK002 - Negative concentration value ...")
     PCCHK002 <- pc |>
@@ -33,6 +35,7 @@ check_PC <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PCCHK002,id="PCCHK002") }
 
+  # PCCHK003 : Missing sample collection date (PCDTC)
   if (isTRUE(active_rules["PCCHK003"])) {
     message("  Running PCCHK003 - Missing PCDTC ...")
     PCCHK003 <- pc |>

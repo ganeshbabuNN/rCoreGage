@@ -11,6 +11,7 @@ check_MH <- function(state, cfg) {
     message("  WARNING [MH]: domains$mh is empty - skipping.") ; return(state) }
   mh <- domains$mh
 
+  # MHCHK001 : Missing medical history term (MHTERM)
   if (isTRUE(active_rules["MHCHK001"])) {
     message("  Running MHCHK001 - Missing MHTERM ...")
     MHCHK001 <- mh |>
@@ -20,6 +21,7 @@ check_MH <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,MHCHK001,id="MHCHK001") }
 
+  # MHCHK002 : Medical history end date before start date
   if (isTRUE(active_rules["MHCHK002"])) {
     message("  Running MHCHK002 - MH end date before start date ...")
     MHCHK002 <- mh |>
@@ -33,6 +35,7 @@ check_MH <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,MHCHK002,id="MHCHK002") }
 
+  # MHCHK003 : Missing onset date (MHSTDTC)
   if (isTRUE(active_rules["MHCHK003"])) {
     message("  Running MHCHK003 - Missing MHSTDTC ...")
     MHCHK003 <- mh |>

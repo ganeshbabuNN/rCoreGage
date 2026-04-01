@@ -11,6 +11,7 @@ check_CM <- function(state, cfg) {
     message("  WARNING [CM]: domains$cm is empty - skipping.") ; return(state) }
   cm <- domains$cm
 
+  # CMCHK001 : CM end date before start date
   if (isTRUE(active_rules["CMCHK001"])) {
     message("  Running CMCHK001 - CM end date before start date ...")
     CMCHK001 <- cm |>
@@ -23,6 +24,7 @@ check_CM <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,CMCHK001,id="CMCHK001") }
 
+  # CMCHK002 : Missing medication name (CMTRT)
   if (isTRUE(active_rules["CMCHK002"])) {
     message("  Running CMCHK002 - Missing CMTRT ...")
     CMCHK002 <- cm |>
@@ -32,6 +34,7 @@ check_CM <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,CMCHK002,id="CMCHK002") }
 
+  # CMCHK003 : Missing indication (CMINDC)
   if (isTRUE(active_rules["CMCHK003"])) {
     message("  Running CMCHK003 - Missing CMINDC ...")
     CMCHK003 <- cm |>

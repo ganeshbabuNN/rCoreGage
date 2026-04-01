@@ -12,7 +12,8 @@ check_EC_study <- function(state, cfg) {
     message("  WARNING [EC_study]: domains$ec is empty - skipping.") ; return(state)
   }
   ec <- domains$ec
-
+  
+  # ECPRJ001 : ECOCCUR occurrence flag missing
   if (isTRUE(active_rules["ECPRJ001"])) {
     message("  Running ECPRJ001 - ECOCCUR flag missing ...")
     if (!"ECOCCUR" %in% names(ec)) {
@@ -27,6 +28,8 @@ check_EC_study <- function(state, cfg) {
       state <- collect_findings(state, ECPRJ001, id="ECPRJ001")
     }
   }
+  
+  # ECPRJ002 : Dose exceeds protocol maximum (40 mg)
   if (isTRUE(active_rules["ECPRJ002"])) {
     message("  Running ECPRJ002 - Dose exceeds protocol maximum (",max_dose_mg,"mg) ...")
     ECPRJ002 <- ec |>
@@ -40,6 +43,8 @@ check_EC_study <- function(state, cfg) {
       dplyr::select(subj_id, vis_id, description)
     state <- collect_findings(state, ECPRJ002, id="ECPRJ002")
   }
+
+  # ECPRJ003 : Reason not provided when ECOCCUR = N
   if (isTRUE(active_rules["ECPRJ003"])) {
     message("  Running ECPRJ003 - Reason missing when ECOCCUR = N ...")
     if (!all(c("ECOCCUR","ECREASND") %in% names(ec))) {

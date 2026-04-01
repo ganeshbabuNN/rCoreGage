@@ -11,6 +11,7 @@ check_DD_study <- function(state, cfg) {
     message("  WARNING [DD_study]: domains$dd is empty - skipping.") ; return(state) }
   dd <- domains$dd
 
+  # DDPRJ001 : Missing coded cause of death (DDDECOD)
   if (isTRUE(active_rules["DDPRJ001"])) {
     message("  Running DDPRJ001 - Missing DDDECOD ...")
     DDPRJ001 <- dd |>
@@ -20,6 +21,7 @@ check_DD_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DDPRJ001,id="DDPRJ001") }
 
+  # DDPRJ002 : Unconfirmed death status (DDSTAT not CONFIRMED)
   if (isTRUE(active_rules["DDPRJ002"])) {
     message("  Running DDPRJ002 - Unconfirmed death status ...")
     DDPRJ002 <- dd |>
@@ -32,6 +34,7 @@ check_DD_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DDPRJ002,id="DDPRJ002") }
 
+  # DDPRJ003 : Missing site ID (SITEID)
   if (isTRUE(active_rules["DDPRJ003"])) {
     message("  Running DDPRJ003 - Missing SITEID ...")
     DDPRJ003 <- dd |>

@@ -12,6 +12,7 @@ check_MH_study <- function(state, cfg) {
     message("  WARNING [MH_study]: domains$mh is empty - skipping.") ; return(state) }
   mh <- domains$mh
 
+  # MHPRJ001 : Missing dictionary coded term (MHDECOD)
   if (isTRUE(active_rules["MHPRJ001"])) {
     message("  Running MHPRJ001 - Missing MHDECOD ...")
     MHPRJ001 <- mh |>
@@ -21,6 +22,7 @@ check_MH_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,MHPRJ001,id="MHPRJ001") }
 
+  # MHPRJ002 : Invalid medical history status (MHSTAT)
   if (isTRUE(active_rules["MHPRJ002"])) {
     message("  Running MHPRJ002 - Invalid MHSTAT ...")
     MHPRJ002 <- mh |>
@@ -33,6 +35,7 @@ check_MH_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,MHPRJ002,id="MHPRJ002") }
 
+  # MHPRJ003 : Missing body system (MHBODSYS)
   if (isTRUE(active_rules["MHPRJ003"])) {
     message("  Running MHPRJ003 - Missing MHBODSYS ...")
     MHPRJ003 <- mh |>

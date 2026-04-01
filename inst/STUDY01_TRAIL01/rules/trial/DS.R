@@ -11,6 +11,7 @@ check_DS <- function(state, cfg) {
     message("  WARNING [DS]: domains$ds is empty - skipping.") ; return(state) }
   ds <- domains$ds
 
+  # DSCHK001 : Missing disposition date (DSSTDTC)
   if (isTRUE(active_rules["DSCHK001"])) {
     message("  Running DSCHK001 - Missing DSSTDTC ...")
     DSCHK001 <- ds |>
@@ -20,7 +21,8 @@ check_DS <- function(state, cfg) {
           ifelse(is.na(DSDECOD),"[DSDECOD missing]",DSDECOD))) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DSCHK001,id="DSCHK001") }
-
+  
+  # DSCHK002 : Missing disposition decision (DSDECOD)
   if (isTRUE(active_rules["DSCHK002"])) {
     message("  Running DSCHK002 - Missing DSDECOD ...")
     DSCHK002 <- ds |>
@@ -29,7 +31,8 @@ check_DS <- function(state, cfg) {
         description="Disposition decision (DSDECOD) is missing in the disposition record") |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DSCHK002,id="DSCHK002") }
-
+  
+  # DSCHK003 : Missing disposition term (DSTERM)
   if (isTRUE(active_rules["DSCHK003"])) {
     message("  Running DSCHK003 - Missing DSTERM ...")
     DSCHK003 <- ds |>

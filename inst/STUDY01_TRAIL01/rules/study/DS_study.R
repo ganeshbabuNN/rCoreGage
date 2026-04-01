@@ -12,6 +12,7 @@ check_DS_study <- function(state, cfg) {
     message("  WARNING [DS_study]: domains$ds is empty - skipping.") ; return(state) }
   ds <- domains$ds
 
+  # DSPRJ001 : Invalid epoch value (DSEPOCH)
   if (isTRUE(active_rules["DSPRJ001"])) {
     message("  Running DSPRJ001 - Invalid DSEPOCH ...")
     DSPRJ001 <- ds |>
@@ -22,7 +23,8 @@ check_DS_study <- function(state, cfg) {
           paste(allowed_epochs,collapse="/"),")")) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DSPRJ001,id="DSPRJ001") }
-
+  
+  # DSPRJ002 : Duplicate primary disposition records per subject
   if (isTRUE(active_rules["DSPRJ002"])) {
     message("  Running DSPRJ002 - Duplicate primary disposition records ...")
     DSPRJ002 <- ds |>
@@ -36,6 +38,7 @@ check_DS_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DSPRJ002,id="DSPRJ002") }
 
+  # DSPRJ003 : Missing site ID (SITEID)
   if (isTRUE(active_rules["DSPRJ003"])) {
     message("  Running DSPRJ003 - Missing SITEID ...")
     DSPRJ003 <- ds |>

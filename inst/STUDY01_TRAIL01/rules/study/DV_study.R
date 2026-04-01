@@ -11,6 +11,7 @@ check_DV_study <- function(state, cfg) {
     message("  WARNING [DV_study]: domains$dv is empty - skipping.") ; return(state) }
   dv <- domains$dv
 
+  # DVPRJ001 : Missing reason for deviation (DVREASND)
   if (isTRUE(active_rules["DVPRJ001"])) {
     message("  Running DVPRJ001 - Missing DVREASND ...")
     DVPRJ001 <- dv |>
@@ -21,6 +22,7 @@ check_DV_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DVPRJ001,id="DVPRJ001") }
 
+  # DVPRJ002 : Missing dictionary coded term (DVDECOD)
   if (isTRUE(active_rules["DVPRJ002"])) {
     message("  Running DVPRJ002 - Missing DVDECOD ...")
     DVPRJ002 <- dv |>
@@ -29,7 +31,8 @@ check_DV_study <- function(state, cfg) {
         description=paste0("Dictionary coded term (DVDECOD) is missing for deviation: ",DVTERM)) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DVPRJ002,id="DVPRJ002") }
-
+  
+  # DVPRJ003 : Missing site ID (SITEID)
   if (isTRUE(active_rules["DVPRJ003"])) {
     message("  Running DVPRJ003 - Missing SITEID ...")
     DVPRJ003 <- dv |>

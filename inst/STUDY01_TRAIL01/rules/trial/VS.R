@@ -11,6 +11,7 @@ check_VS <- function(state, cfg) {
     message("  WARNING [VS]: domains$vs is empty - skipping.") ; return(state) }
   vs <- domains$vs
 
+  # VSCHK001 : Systolic BP not greater than diastolic BP
   if (isTRUE(active_rules["VSCHK001"])) {
     message("  Running VSCHK001 - Systolic BP not greater than diastolic BP ...")
     sysbp <- vs |> dplyr::filter(VSTESTCD=="SYSBP",!is.na(VSORRES),trimws(VSORRES)!="") |>
@@ -27,6 +28,7 @@ check_VS <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,VSCHK001,id="VSCHK001") }
 
+  # VSCHK002 : Missing vital sign result (VSORRES)
   if (isTRUE(active_rules["VSCHK002"])) {
     message("  Running VSCHK002 - Missing VSORRES ...")
     VSCHK002 <- vs |>
@@ -37,6 +39,7 @@ check_VS <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,VSCHK002,id="VSCHK002") }
 
+  # VSCHK003 : Vital sign value outside normal reference range
   if (isTRUE(active_rules["VSCHK003"])) {
     message("  Running VSCHK003 - Value outside normal range ...")
     VSCHK003 <- vs |>

@@ -11,6 +11,7 @@ check_PP_study <- function(state, cfg) {
     message("  WARNING [PP_study]: domains$pp is empty - skipping.") ; return(state) }
   pp <- domains$pp
 
+  # PPPRJ001 : Missing standardised units (PPSTRESU)
   if (isTRUE(active_rules["PPPRJ001"])) {
     message("  Running PPPRJ001 - Missing PPSTRESU ...")
     PPPRJ001 <- pp |>
@@ -20,6 +21,7 @@ check_PP_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PPPRJ001,id="PPPRJ001") }
 
+  # PPPRJ002 : Missing specimen type (PPSPEC)
   if (isTRUE(active_rules["PPPRJ002"])) {
     message("  Running PPPRJ002 - Missing PPSPEC ...")
     PPPRJ002 <- pp |>
@@ -28,7 +30,8 @@ check_PP_study <- function(state, cfg) {
         description=paste0("Specimen type (PPSPEC) is missing for parameter: ",PPTESTCD)) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PPPRJ002,id="PPPRJ002") }
-
+  
+  # PPPRJ003 : Invalid parameter category (PPCAT not DERIVED)
   if (isTRUE(active_rules["PPPRJ003"])) {
     message("  Running PPPRJ003 - Invalid PPCAT (expected DERIVED) ...")
     PPPRJ003 <- pp |>

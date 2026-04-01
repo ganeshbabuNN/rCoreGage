@@ -11,6 +11,7 @@ check_DV <- function(state, cfg) {
     message("  WARNING [DV]: domains$dv is empty - skipping.") ; return(state) }
   dv <- domains$dv
 
+  # DVCHK001 : Missing deviation date (DVSTDTC)
   if (isTRUE(active_rules["DVCHK001"])) {
     message("  Running DVCHK001 - Missing DVSTDTC ...")
     DVCHK001 <- dv |>
@@ -21,6 +22,7 @@ check_DV <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DVCHK001,id="DVCHK001") }
 
+  # DVCHK002 : Missing deviation term (DVTERM)
   if (isTRUE(active_rules["DVCHK002"])) {
     message("  Running DVCHK002 - Missing DVTERM ...")
     DVCHK002 <- dv |>
@@ -30,6 +32,7 @@ check_DV <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DVCHK002,id="DVCHK002") }
 
+  # DVCHK003 : Missing deviation category (DVCAT)
   if (isTRUE(active_rules["DVCHK003"])) {
     message("  Running DVCHK003 - Missing DVCAT ...")
     DVCHK003 <- dv |>

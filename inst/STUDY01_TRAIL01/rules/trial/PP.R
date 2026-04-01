@@ -11,6 +11,7 @@ check_PP <- function(state, cfg) {
     message("  WARNING [PP]: domains$pp is empty - skipping.") ; return(state) }
   pp <- domains$pp
 
+  # PPCHK001 : Missing PK parameter result (PPORRES)
   if (isTRUE(active_rules["PPCHK001"])) {
     message("  Running PPCHK001 - Missing PPORRES ...")
     PPCHK001 <- pp |>
@@ -20,6 +21,7 @@ check_PP <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PPCHK001,id="PPCHK001") }
 
+  # PPCHK002 : Negative PK parameter value
   if (isTRUE(active_rules["PPCHK002"])) {
     message("  Running PPCHK002 - Negative PK parameter value ...")
     PPCHK002 <- pp |>
@@ -32,6 +34,7 @@ check_PP <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,PPCHK002,id="PPCHK002") }
 
+  # PPCHK003 : Missing analysis date (PPDTC)
   if (isTRUE(active_rules["PPCHK003"])) {
     message("  Running PPCHK003 - Missing PPDTC ...")
     PPCHK003 <- pp |>

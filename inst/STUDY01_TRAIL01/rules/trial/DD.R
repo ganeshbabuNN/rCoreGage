@@ -11,6 +11,7 @@ check_DD <- function(state, cfg) {
     message("  WARNING [DD]: domains$dd is empty - skipping.") ; return(state) }
   dd <- domains$dd
 
+  # DDCHK001 : Missing date of death (DDDTHDTC)
   if (isTRUE(active_rules["DDCHK001"])) {
     message("  Running DDCHK001 - Missing DDDTHDTC ...")
     DDCHK001 <- dd |>
@@ -20,6 +21,7 @@ check_DD <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DDCHK001,id="DDCHK001") }
 
+  # DDCHK002 : Missing cause of death term (DDTERM)
   if (isTRUE(active_rules["DDCHK002"])) {
     message("  Running DDCHK002 - Missing DDTERM ...")
     DDCHK002 <- dd |>
@@ -29,6 +31,7 @@ check_DD <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,DDCHK002,id="DDCHK002") }
 
+  # DDCHK003 : Missing death flag (DTHFL)
   if (isTRUE(active_rules["DDCHK003"])) {
     message("  Running DDCHK003 - Missing DTHFL ...")
     DDCHK003 <- dd |>

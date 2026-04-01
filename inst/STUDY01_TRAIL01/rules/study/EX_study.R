@@ -12,7 +12,8 @@ check_EX_study <- function(state, cfg) {
   if (is.null(domains$ex) || nrow(domains$ex)==0) {
     message("  WARNING [EX_study]: domains$ex is empty - skipping.") ; return(state) }
   ex <- domains$ex
-
+  
+  # EXPRJ001 : Invalid dose form - not in allowed list (TABLET/CAPSULE)
   if (isTRUE(active_rules["EXPRJ001"])) {
     message("  Running EXPRJ001 - Invalid dose form ...")
     EXPRJ001 <- ex |>
@@ -24,6 +25,7 @@ check_EX_study <- function(state, cfg) {
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,EXPRJ001,id="EXPRJ001") }
 
+  # EXPRJ002 : Administered dose exceeds protocol maximum (40 mg)
   if (isTRUE(active_rules["EXPRJ002"])) {
     message("  Running EXPRJ002 - Dose exceeds protocol maximum (",max_dose_mg,"mg) ...")
     EXPRJ002 <- ex |>
@@ -35,7 +37,8 @@ check_EX_study <- function(state, cfg) {
           max_dose_mg," mg for treatment: ",EXTRT," at visit ",VISIT)) |>
       dplyr::select(subj_id,vis_id,description)
     state <- collect_findings(state,EXPRJ002,id="EXPRJ002") }
-
+  
+  # EXPRJ003 : Missing administration status (EXSTAT)
   if (isTRUE(active_rules["EXPRJ003"])) {
     message("  Running EXPRJ003 - Missing EXSTAT ...")
     EXPRJ003 <- ex |>
