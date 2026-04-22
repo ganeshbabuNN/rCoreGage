@@ -43,12 +43,24 @@ findings data frame, counts valid observations via
 \code{state$summary_log}.
 }
 \examples{
-\dontrun{
-MY_CHECK <- ae |>
-  dplyr::filter(is.na(AESEV)) |>
-  dplyr::mutate(subj_id = USUBJID, vis_id = NA_real_,
-                description = "AESEV is missing") |>
-  dplyr::select(subj_id, vis_id, description)
+\donttest{
+# Build a minimal state object
+state <- list(
+  issues = data.frame(id = character(0), subj_id = character(0),
+                      vis_id = numeric(0), description = character(0),
+                      review = character(0), stringsAsFactors = FALSE),
+  summary_log = data.frame(headlink = character(0), nu = integer(0),
+                           rule_set = character(0), sobs = character(0),
+                           stringsAsFactors = FALSE)
+)
+
+# A findings data frame produced by a check
+MY_CHECK <- data.frame(
+  subj_id     = c("SUBJ-001", "SUBJ-002"),
+  vis_id      = NA_real_,
+  description = c("AESEV missing for RASH", "AESEV missing for HEADACHE"),
+  stringsAsFactors = FALSE
+)
 
 state <- collect_findings(state, MY_CHECK, id = "AECHK001")
 }

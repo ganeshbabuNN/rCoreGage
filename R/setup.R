@@ -13,8 +13,17 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' source("rules/config/project_config.R")
+#' \donttest{
+#' tmp_rep <- tempdir()
+#' cfg <- list(
+#'   rule_registry = system.file("extdata", "rule_registry.xlsx",
+#'                               package = "rCoreGage"),
+#'   trial_checks  = tmp_rep,
+#'   study_checks  = tmp_rep,
+#'   inputs        = tmp_rep,
+#'   reports       = tmp_rep,
+#'   feedback      = tmp_rep
+#' )
 #' state <- setup_coregage(cfg)
 #' }
 setup_coregage <- function(cfg) {
@@ -115,9 +124,9 @@ setup_coregage <- function(cfg) {
   message("  Active: ", n_on, " ON  /  ", n_off, " OFF")
 
   #  Active rules switch vector 
-  active_rules <- setNames(
+  active_rules <- structure(
     startsWith(rule_registry$active, "Y"),
-    rule_registry$id
+    names = rule_registry$id
   )
 
   session <- list(

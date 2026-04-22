@@ -16,19 +16,23 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' rCoreGage::create_project(
-#'   name = "TRIAL_ABC",
-#'   path = "C:/Projects"
-#' )
+#' \donttest{
+#' proj_path <- file.path(tempdir(), "example_project")
+#' dir.create(proj_path, showWarnings = FALSE)
+#' create_project(name = "TRIAL_ABC", path = proj_path)
 #' }
-create_project <- function(name, path = getwd(), overwrite = FALSE) {
+create_project <- function(name, path, overwrite = FALSE) {
 
   project_root <- file.path(path, name)
 
   if (dir.exists(project_root) && !overwrite) {
     stop("Project folder already exists: ", project_root,
          "\nSet overwrite = TRUE to overwrite.")
+  }
+
+  if (missing(path) || !nzchar(path)) {
+    stop("'path' must be supplied. ",
+         "Use path = tempdir() for testing or specify your project directory.")
   }
 
   message(">> Creating CoreGage project '", name, "' at: ", project_root)

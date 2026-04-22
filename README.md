@@ -1,16 +1,19 @@
-# rCoreGage <img src="https://img.shields.io/badge/version-0.1.0-blue" align="right"/> <img src="https://img.shields.io/badge/license-GPL--3.0-green" align="right"/>
+# rCoreGage 
+
+![version](https://img.shields.io/badge/version-0.1.0-blue)
+![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 > **Data Quality Check Framework for Clinical and Analytical Data**
 
-`rCoreGage` is a configuration-driven R package for running domain-level data
+rCoreGage is a configuration-driven R package for running domain-level data
 quality checks and consolidating findings into structured Excel reports with
 role-based feedback routing. It is designed to be installed once from CRAN and
 reused across any number of trials or studies without changing the engine code.
 
----
+***
 
 ## Table of Contents
-
+  
 1. [Why rCoreGage](#1-why-rcoregage)
 2. [Architecture — Two Layers](#2-architecture--two-layers)
 3. [Installation](#3-installation)
@@ -33,7 +36,7 @@ reused across any number of trials or studies without changing the engine code.
 15. [Troubleshooting](#15-troubleshooting)
 16. [Contributing](#16-contributing)
 
----
+***
 
 ## 1. Why rCoreGage
 
@@ -58,7 +61,7 @@ copy-pasted per trial, with no separation between the engine and the rules.
 | Feedback lost between runs | Structured feedback folders merged on every re-run |
 | SAS-origin terminology | Fully generic — works for any tabular data domain |
 
----
+***
 
 ## 2. Architecture — Two Layers
 
@@ -110,7 +113,7 @@ copy-pasted per trial, with no separation between the engine and the rules.
 **The key separation:** the engine (Layer 1) never changes between trials.
 Only the check scripts, `rule_registry.xlsx`, and `inputs/` change per trial.
 
----
+***
 ## 3. Installation
 
 ### From CRAN (stable release)
@@ -158,7 +161,7 @@ install.packages("haven")   # enables reading .sas7bdat from inputs/
 - RStudio (recommended, not required)
 - Windows, macOS, or Linux
 
----
+***
 
 ## 4. Quick Start
 
@@ -287,7 +290,7 @@ cfg <- list(
 )
 ```
 
----
+***
 
 ## 6. rule_registry.xlsx — Check Definitions
 
@@ -336,7 +339,7 @@ Rule_Set = "AE_study"  →  rules/study/AE_study.R  (function: check_AE_study)
 Rule_Set = "LB"        →  rules/trial/LB.R        (function: check_LB)
 ```
 
----
+***
 
 ## 7. How It Works — Layered Execution Model
 
@@ -525,7 +528,7 @@ channels they appear in, controlled by the `DM_Report` / `MW_Report` /
    all_closed.xlsx  — all checks, all closed findings
 ```
 
----
+***
 
 ## 8. Trial vs Study Level — Full Comparison
 
@@ -570,7 +573,7 @@ channels they appear in, controlled by the `DM_Report` / `MW_Report` /
     (AEPRJ001 Yes)   AEPRJ002 Yes)
 ```
 
----
+***
 
 ## 9. The Feedback Loop
 
@@ -632,7 +635,7 @@ Feedback summary:
 -------------------------------------------------------
 ```
 
----
+***
 
 ## 10. Writing Check Scripts
 
@@ -697,7 +700,7 @@ check_AE <- function(state, cfg) {
 | Check guard | `if (isTRUE(active_rules["CHECKID"]))` — never `if (active_rules["CHECKID"])` |
 | Domain guard | Always check `is.null(domains$xx) || nrow(domains$xx) == 0` before using |
 
----
+***
 
 ## 11. Engine Functions Reference
 
@@ -774,7 +777,7 @@ rCoreGage::create_project("TRIAL_ABC", path = "C:/Projects")
 rCoreGage::create_project("TRIAL_ABC", path = "C:/Projects", overwrite = TRUE)
 ```
 
----
+***
 
 ## 12. Console Output Reference
 
@@ -825,7 +828,7 @@ rCoreGage::create_project("TRIAL_ABC", path = "C:/Projects", overwrite = TRUE)
 >> Reports: C:/.../outputs/reports
 ```
 
----
+***
 
 ## 13. Features
 
@@ -876,7 +879,7 @@ Works on Windows, macOS, and Linux. File paths use `file.path()` throughout.
 Date parsing handles ISO strings, Excel serial numbers, and `ddMMMYYYY` format
 without platform-specific issues.
 
----
+***
 
 ## 14. Examples
 
@@ -985,7 +988,7 @@ skipped silently on every run. Set it back to `Yes` to re-enable.
 
 No engine code changes required.
 
----
+***
 
 ## 15. Troubleshooting
 
@@ -1028,7 +1031,7 @@ reviewer-closed findings are tracked separately via `[closed by reviewer]`.
 install.packages("haven")
 ```
 
----
+***
 
 ## 16. Contributing
 
@@ -1062,15 +1065,13 @@ rCoreGage\inst\STUDY01_TRAIL01\
 Covered few project(study) and trial related checks has been covered with all sample data and scripts available in the above locations.
 This has been tested with all the scenario.
 
----
+***
 
 ## License
 
 GPL (>= 3) © Ganesh Babu G
 
-See [LICENSE](LICENSE) for full terms.
-
----
+***
 
 ## Citation
 

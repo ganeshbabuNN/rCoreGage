@@ -19,12 +19,24 @@ Updated \code{state} object with \code{issues} and
 Loops through all active rule sets defined in the rule registry,
 sources each check script from the appropriate folder
 (trial checks from \code{cfg$trial_checks}, study checks from
-\code{cfg$study_checks}), and calls \code{check_<rule_set>(state, cfg)}.
+\code{cfg$study_checks}), and calls \code{check_RULESET(state, cfg)},
+where \code{RULESET} is the value from the \code{Rule_Set} column in
+\code{rule_registry.xlsx}.
 }
 \examples{
-\dontrun{
-state <- setup_coregage(cfg)
-state$domains <- load_inputs(cfg)
-state <- run_checks(cfg, state)
+\donttest{
+tmp_rep <- tempdir()
+cfg <- list(
+  rule_registry = system.file("extdata", "rule_registry.xlsx",
+                              package = "rCoreGage"),
+  trial_checks  = tmp_rep,
+  study_checks  = tmp_rep,
+  inputs        = tmp_rep,
+  reports       = tmp_rep,
+  feedback      = tmp_rep
+)
+state          <- setup_coregage(cfg)
+state$domains  <- load_inputs(cfg)
+state          <- run_checks(cfg, state)
 }
 }

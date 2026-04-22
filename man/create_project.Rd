@@ -4,7 +4,7 @@
 \alias{create_project}
 \title{Create a new CoreGage project}
 \usage{
-create_project(name, path = getwd(), overwrite = FALSE)
+create_project(name, path, overwrite = FALSE)
 }
 \arguments{
 \item{name}{Character. Project name. Used as the folder name and
@@ -26,10 +26,9 @@ After running this function, open the generated \code{.Rproj} file in
 RStudio and start working.
 }
 \examples{
-\dontrun{
-rCoreGage::create_project(
-  name = "TRIAL_ABC",
-  path = "C:/Projects"
-)
+\donttest{
+proj_path <- file.path(tempdir(), "example_project")
+dir.create(proj_path, showWarnings = FALSE)
+create_project(name = "TRIAL_ABC", path = proj_path)
 }
 }

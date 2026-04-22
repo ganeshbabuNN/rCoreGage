@@ -13,10 +13,16 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' # Create a temporary inputs folder with a sample CSV
+#' tmp_inp <- tempdir()
+#' write.csv(
+#'   data.frame(USUBJID = "SUBJ-001", AETERM = "RASH"),
+#'   file.path(tmp_inp, "AE.csv"), row.names = FALSE
+#' )
+#' cfg     <- list(inputs = tmp_inp)
 #' domains <- load_inputs(cfg)
-#' # domains$ae   - Adverse Events
-#' # domains$lb   - Laboratory Results
+#' # domains$ae contains the loaded Adverse Events data
 #' }
 load_inputs <- function(cfg) {
 
@@ -32,7 +38,7 @@ load_inputs <- function(cfg) {
                           full.names = TRUE, ignore.case = TRUE)
   for (f in csv_files) {
     nm <- tolower(tools::file_path_sans_ext(basename(f)))
-    domains[[nm]] <- read.csv(f, stringsAsFactors = FALSE,
+    domains[[nm]] <- utils::read.csv(f, stringsAsFactors = FALSE,
                               na.strings  = c("", "NA"),
                               check.names = FALSE)
     message("   ", basename(f), " -> domains$", nm,

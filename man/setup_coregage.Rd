@@ -21,8 +21,17 @@ switch vector, and initialises all empty master tables required for
 a check run. This is the first function called in every run.
 }
 \examples{
-\dontrun{
-source("rules/config/project_config.R")
+\donttest{
+tmp_rep <- tempdir()
+cfg <- list(
+  rule_registry = system.file("extdata", "rule_registry.xlsx",
+                              package = "rCoreGage"),
+  trial_checks  = tmp_rep,
+  study_checks  = tmp_rep,
+  inputs        = tmp_rep,
+  reports       = tmp_rep,
+  feedback      = tmp_rep
+)
 state <- setup_coregage(cfg)
 }
 }

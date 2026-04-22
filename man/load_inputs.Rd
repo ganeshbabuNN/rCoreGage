@@ -21,9 +21,15 @@ lowercase filename without extension (e.g. \code{AE.csv} becomes
 picked up automatically on the next run - no code change required.
 }
 \examples{
-\dontrun{
+\donttest{
+# Create a temporary inputs folder with a sample CSV
+tmp_inp <- tempdir()
+write.csv(
+  data.frame(USUBJID = "SUBJ-001", AETERM = "RASH"),
+  file.path(tmp_inp, "AE.csv"), row.names = FALSE
+)
+cfg     <- list(inputs = tmp_inp)
 domains <- load_inputs(cfg)
-# domains$ae   - Adverse Events
-# domains$lb   - Laboratory Results
+# domains$ae contains the loaded Adverse Events data
 }
 }

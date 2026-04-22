@@ -27,7 +27,20 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' tmp_rep <- tempdir()
+#' cfg <- list(
+#'   rule_registry = system.file("extdata", "rule_registry.xlsx",
+#'                               package = "rCoreGage"),
+#'   trial_checks  = tmp_rep,
+#'   study_checks  = tmp_rep,
+#'   inputs        = tmp_rep,
+#'   reports       = tmp_rep,
+#'   feedback      = tmp_rep
+#' )
+#' state         <- setup_coregage(cfg)
+#' state$domains <- load_inputs(cfg)
+#' state         <- run_checks(cfg, state)
 #' build_reports(cfg, state)
 #' }
 build_reports <- function(cfg, state) {
@@ -461,11 +474,14 @@ build_reports <- function(cfg, state) {
 
   #  Build summary 
   count_by <- function(df, col) {
-    if (nrow(df) == 0) return(data.frame(id=character(0),x=integer(0),
-                                          stringsAsFactors=FALSE) |>
-                               setNames(c("id",col)))
+    if (nrow(df) == 0) {
+      out <- data.frame(id=character(0), x=integer(0), stringsAsFactors=FALSE)
+      names(out) <- c("id", col)
+      return(out)
+    }
     tbl <- as.data.frame(table(df$id), stringsAsFactors=FALSE)
-    names(tbl) <- c("id", col) ; tbl
+    names(tbl) <- c("id", col)
+    tbl
   }
 
   n_open   <- count_by(open_iss,   "n_open")

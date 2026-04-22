@@ -23,12 +23,24 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' MY_CHECK <- ae |>
-#'   dplyr::filter(is.na(AESEV)) |>
-#'   dplyr::mutate(subj_id = USUBJID, vis_id = NA_real_,
-#'                 description = "AESEV is missing") |>
-#'   dplyr::select(subj_id, vis_id, description)
+#' \donttest{
+#' # Build a minimal state object
+#' state <- list(
+#'   issues = data.frame(id = character(0), subj_id = character(0),
+#'                       vis_id = numeric(0), description = character(0),
+#'                       review = character(0), stringsAsFactors = FALSE),
+#'   summary_log = data.frame(headlink = character(0), nu = integer(0),
+#'                            rule_set = character(0), sobs = character(0),
+#'                            stringsAsFactors = FALSE)
+#' )
+#'
+#' # A findings data frame produced by a check
+#' MY_CHECK <- data.frame(
+#'   subj_id     = c("SUBJ-001", "SUBJ-002"),
+#'   vis_id      = NA_real_,
+#'   description = c("AESEV missing for RASH", "AESEV missing for HEADACHE"),
+#'   stringsAsFactors = FALSE
+#' )
 #'
 #' state <- collect_findings(state, MY_CHECK, id = "AECHK001")
 #' }
@@ -68,17 +80,26 @@ collect_findings <- function(state, df, id,
 
   keep_cols <- intersect(c("subj_id", "vis_id", "description"),
                          names(new_issues))
-  new_issues <- new_issues[, keep_cols]
+  new_issues <- new_issues[, keep_cols, drop = FALSE]
 
-  new_issues$id          <- id
-  new_issues$review      <- "ANALYST"
-  new_issues$subj_id     <- as.character(new_issues$subj_id)
-  new_issues$description <- substr(as.character(new_issues$description),
-                                   1, 200)
+  # Ensure vis_id column exists before column operations
   if (!"vis_id" %in% names(new_issues)) {
     new_issues$vis_id <- NA_real_
   } else {
     new_issues$vis_id <- suppressWarnings(as.numeric(new_issues$vis_id))
+  }
+
+  # Only perform row-level assignments when rows exist
+  if (nrow(new_issues) > 0) {
+    new_issues$id          <- id
+    new_issues$review      <- "ANALYST"
+    new_issues$subj_id     <- as.character(new_issues$subj_id)
+    new_issues$description <- substr(as.character(new_issues$description),
+                                     1, 200)
+  } else {
+    # 0-row df: add columns with correct types but no rows
+    new_issues$id     <- character(0)
+    new_issues$review <- character(0)
   }
 
   new_issues <- unique(new_issues[, c("id", "subj_id", "vis_id",

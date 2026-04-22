@@ -36,7 +36,20 @@ from each feedback folder, merges \code{analyst_note},
 overwrites the reports with the merged version.
 }
 \examples{
-\dontrun{
+\donttest{
+tmp_rep <- tempdir()
+cfg <- list(
+  rule_registry = system.file("extdata", "rule_registry.xlsx",
+                              package = "rCoreGage"),
+  trial_checks  = tmp_rep,
+  study_checks  = tmp_rep,
+  inputs        = tmp_rep,
+  reports       = tmp_rep,
+  feedback      = tmp_rep
+)
+state         <- setup_coregage(cfg)
+state$domains <- load_inputs(cfg)
+state         <- run_checks(cfg, state)
 build_reports(cfg, state)
 }
 }
