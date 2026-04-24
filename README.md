@@ -1,6 +1,6 @@
 # rCoreGage 
 
-![version](https://img.shields.io/badge/version-0.1.0-blue)
+![version](https://img.shields.io/badge/version-1.0.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 > **Data Quality Check Framework for Clinical and Analytical Data**
