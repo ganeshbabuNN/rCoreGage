@@ -1,6 +1,6 @@
 # rCoreGage 
 
-![version](https://img.shields.io/badge/version-1.0.0-blue)
+![version](https://img.shields.io/badge/version-1.1.0-blue)
 ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 
 > **Data Quality Check Framework for Clinical and Analytical Data**
@@ -35,6 +35,7 @@ reused across any number of trials or studies without changing the engine code.
 14. [Examples](#14-examples)
 15. [Troubleshooting](#15-troubleshooting)
 16. [Contributing](#16-contributing)
+17. [Change Log](#17-change-log)
 
 ***
 
@@ -1066,6 +1067,9 @@ Covered few project(study) and trial related checks has been covered with all sa
 This has been tested with all the scenario.
 
 ***
+## 17. Change Log
+
+Refer NEWS.md
 
 ## License
 

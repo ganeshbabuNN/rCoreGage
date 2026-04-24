@@ -63,7 +63,7 @@ run_checks <- function(cfg, state) {
       }
 
       tryCatch({
-        check_env <- new.env(parent = baseenv())
+        check_env <- new.env(parent = environment())
         sys.source(check_file, envir = check_env, keep.source = FALSE)
         fn_name <- paste0("check_", rs)
         if (!exists(fn_name, envir = check_env, inherits = FALSE)) {

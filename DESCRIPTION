@@ -1,6 +1,6 @@
 Package: rCoreGage
 Title: Data Quality Check Framework for Clinical and Analytical Data
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person("Ganesh Babu G", email = "ganeshbabu346@gmail.com",
            role = c("aut", "cre")))
